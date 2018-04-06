@@ -6,20 +6,19 @@ https://api.highcharts.com/highmaps/
 
 
 /*~~~~~ Load external shapefiles and JCHS logo ~~~~~~*/
-counties = Highcharts.geojson(Highcharts.maps["countries/us/us-all-all-highres"])
-//counties = Highcharts.maps["countries/us/counties"]
-states = Highcharts.geojson(Highcharts.maps["countries/us/us-all-all-highres"], 'mapline')
-logoURL =
-  "http://www.jchs.harvard.edu/sites/jchs.harvard.edu/files/harvard_jchs_logo_2017.png"
+var counties = Highcharts.geojson(Highcharts.maps["countries/us/us-all-all-highres"])
+var states = Highcharts.geojson(Highcharts.maps["countries/us/us-all-all-highres"], 'mapline')
+var logoURL = "http://www.jchs.harvard.edu/sites/jchs.harvard.edu/files/harvard_jchs_logo_2017.png"
 
-
-data_classes_netflow = [
-  {to: -1000,
-   color: "#560101"         
+var data_classes_netflow = [
+  {
+    to: -1000,
+    color: "#560101"
   },
-  {from: -1000,
-   to: -100,
-   color: "#E3371E"
+  {
+    from: -1000,
+    to: -100,
+    color: "#E3371E"
   },
   {
     from: -100,
@@ -42,56 +41,49 @@ data_classes_netflow = [
   }
 ]
 
-
 var selected_year = $('#select_year').val()
 var selected_county_type = $('#county_type :checked').val()
-var selected_flow = 'Netflows'
-var selected_metro = ''
-var selected_metro_name = ''
-var flow_data = {}
 var ref_data = []
 var map_data = []
-
 
 var baseURL = "https://sheets.googleapis.com/v4/spreadsheets/"
 var API_Key = "AIzaSyDY_gHLV0A7liVYq64RxH7f7IYUKF15sOQ"
 var API_params = "valueRenderOption=UNFORMATTED_VALUE"
 
+//Change for specific source table
+var SheetID = "1joBNc8UeeOqFKjmaCgNllemRZKN_UC8Nms-blkebVzI"
+var range = "Sheet1!A:N"
+
 
 /*~~~~~~ Document ready function ~~~~~~~~~~~~~~~~~*/
-$(document).ready(function() {
+$(document).ready(function () {
   createMap()
 })
 
 
 /*~~~~~~ Create the main map ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-function createMap() { 
+function createMap () {
 
   /*~~~~~~~~ Google Sheet API request ~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-  //Change for specific source table
   //This is the data for the base map, the first thing that appears -RF
-  //Put data here
-  var SheetID = "1joBNc8UeeOqFKjmaCgNllemRZKN_UC8Nms-blkebVzI"
-  var range = "Sheet1!A:N"
-
-  var requestURL = baseURL 
-    + SheetID 
-    + "/values/" 
-    + range 
-    + "?key=" 
-    + API_Key 
-    + "&" 
+  var requestURL = baseURL
+    + SheetID
+    + "/values/"
+    + range
+    + "?key="
+    + API_Key
+    + "&"
     + API_params
 
-  $.get(requestURL, function(obj) {
+  $.get(requestURL, function (obj) {
     console.log(requestURL)
 
     ref_data = obj.values
-    
+
     map_data = ref_data
       .map(el => [el[0], el[1]])
       .filter(x => typeof x[1] !== 'string')
-    
+
     /*~~~~~~~~ Standard JCHS Highcharts options ~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     Highcharts.setOptions({
       credits: { enabled: false },
@@ -114,7 +106,7 @@ function createMap() {
         margin: [50, 30, 75, 10], //to allow space for title at top, legend at right, and notes at bottom
         borderWidth: 0,
         events: {
-          load: function() {
+          load: function () {
             this.renderer
               .image(logoURL, 0, this.chartHeight - 80, 289, 85) //puts logo in lower left
               .add() // (src,x,y,width,height)            
@@ -127,7 +119,7 @@ function createMap() {
       subtitle: {
         //use subtitle element for our table notes
         text:
-        "Notes: The IRS does not report any county pairings with fewer than ten migrants due to confidentiality concerns (net flows are caclulated by subtracting outflows from inflows, and may be affected by this exclusion for counties with very low migration flows). Each year shown is the second year of a year pairing (e.g. 2012 represents returns matched from 2011-2012). The 2015 data are excluded due to data quality issues that year. <br/>Source: JCHS tabulations of IRS, SOI Migration Data.",
+          "Notes: The IRS does not report any county pairings with fewer than ten migrants due to confidentiality concerns (net flows are caclulated by subtracting outflows from inflows, and may be affected by this exclusion for counties with very low migration flows). Each year shown is the second year of a year pairing (e.g. 2012 represents returns matched from 2011-2012). The 2015 data are excluded due to data quality issues that year. <br/>Source: JCHS tabulations of IRS, SOI Migration Data.",
         widthAdjust: -300,
         align: "left",
         x: 300,
@@ -142,7 +134,7 @@ function createMap() {
       //main title of chart
       title: {
         text:
-        'Net Flows, ' + selected_year,
+          'Net Flows, ' + selected_year,
         style: {
           color: "#C14D00",
           fontWeight: 600,
@@ -160,7 +152,7 @@ function createMap() {
         y: 110,
         x: 10,
         backgroundColor: "rgba(255, 255, 255, 0.9)",
-        labelFormatter: function() {
+        labelFormatter: function () {
           if ((this.from != null) & (this.to != null)) { //legend entries w/ upper & lower bound
             return this.from + " to " + this.to
           } else if (this.to != null) { //lowest legend entry
@@ -193,7 +185,7 @@ function createMap() {
           },
           point: {
             events: {
-              click: function(event) {
+              click: function (event) {
                 console.log("clicked on map: " + event.point.name)
                 //selected_metro = event.point.fips
                 //selected_metro_name = event.point.name
@@ -216,20 +208,20 @@ function createMap() {
       ],
 
       tooltip: {
-       formatter: function() {
+        formatter: function () {
           if (this.point.value != null) {
             return (
-              "<b>" 
+              "<b>"
               + this.point.name
               + "</b><br/>"
               + 'Migrants'
               //+ this.series.name
               + ": "
-              + this.point.value.toLocaleString() 
+              + this.point.value.toLocaleString()
             )
           } else if (this.point.name != null) {
             return (
-              '<b>' 
+              '<b>'
               + this.point.name
               + '</b>'
             )
@@ -270,44 +262,51 @@ function createMap() {
           }
         }
       } //end exporting
-      
+
     }) //end map
 
   }) //end get request
-  
-} //end createMap()
 
-
-
+} //end createMap ()
 
 
 $('#select_year').change(function () {
-  selected_year = $('#select_year').val()
+  var new_range = $('#select_year').val() + '!A:N'
 
-  if (selected_flow != 'Netflows') {
-    var flow_load_result = getFlowData(selected_flow, selected_year)
+  var requestURL = baseURL
+    + SheetID
+    + "/values/"
+    + new_range
+    + "?key="
+    + API_Key
+    + "&"
+    + API_params
 
-    if (selected_metro !== '' & flow_load_result === 'data already loaded') {
-      focusMetro(selected_metro, selected_metro_name)
-    } 
-  } else {
-    netflowMap()
-    getFlowData('Inflows', selected_year, false)
-  }
+  $.get(requestURL, function (obj) {
+    console.log(requestURL)
+
+    var new_data = obj.values
+      .map(el => [el[0], el[selected_county_type]])
+      .filter(x => typeof x[1] !== 'string')
+
+    map.series[0].setData(new_data)
+
+  })
 
 })
 
+
 $('#county_type').change(function () {
-  
+
   selected_county_type = $('#county_type :checked').val()
   selected_county_type = parseInt(selected_county_type) //to convert from string to int
   console.log(selected_county_type)
-  
+
   //Loop first to create new data table
-   var new_data = ref_data
+  var new_data = ref_data
     .map(el => [el[0], el[selected_county_type]])
     .filter(x => typeof x[1] !== 'string')
-      
+
   map.series[0].setData(new_data)
-  
+
 })
