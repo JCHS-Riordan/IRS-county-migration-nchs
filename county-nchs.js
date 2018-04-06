@@ -24,12 +24,12 @@ data_classes_netflow = [
   {
     from: -100,
     to: 0,
-    color: "#FF8372" /*Option: gray these out: #F9F6F5 */
+    color: "#FF8372"
   },
   {
     from: 0,
     to: 100,
-    color: "#F9F6F5" /*NOTE: the missing values (e.g. for non-urban counties) are considered zero, so if you change this coloration, it colors the whole map*/
+    color: "#B9EEEC"
   },
   {
     from: 100,
