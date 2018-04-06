@@ -44,12 +44,14 @@ data_classes_netflow = [
 
 
 var selected_year = $('#select_year').val()
-var selected_county_type = $('#county_type')
+var selected_county_type = $('#county_type :checked').val()
 var selected_flow = 'Netflows'
 var selected_metro = ''
 var selected_metro_name = ''
 var flow_data = {}
+var ref_data = []
 var map_data = []
+
 
 var baseURL = "https://sheets.googleapis.com/v4/spreadsheets/"
 var API_Key = "AIzaSyDY_gHLV0A7liVYq64RxH7f7IYUKF15sOQ"
@@ -59,25 +61,6 @@ var API_params = "valueRenderOption=UNFORMATTED_VALUE"
 /*~~~~~~ Document ready function ~~~~~~~~~~~~~~~~~*/
 $(document).ready(function() {
   createMap()
-  
-  var SheetID = "1joBNc8UeeOqFKjmaCgNllemRZKN_UC8Nms-blkebVzI"
-  var range = "Sheet1!A:N"
-
-  var requestURL2 = baseURL 
-  + SheetID 
-  + "/values/" 
-  + range 
-  + "?key=" 
-  + API_Key 
-  + "&" 
-  + API_params
-
-  $.get(requestURL2, function(obj) {
-    console.log(requestURL2)
-
-    flow_data['Netflows'] = obj.values
-    
-  })
 })
 
 
@@ -103,8 +86,11 @@ function createMap() {
   $.get(requestURL, function(obj) {
     console.log(requestURL)
 
-    map_data = obj.values
+    ref_data = obj.values
+    
+    map_data = ref_data.map(el => [el[0], el[1]])
 
+    
     /*~~~~~~~~ Standard JCHS Highcharts options ~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     Highcharts.setOptions({
       credits: { enabled: false },
@@ -127,13 +113,10 @@ function createMap() {
         margin: [50, 30, 75, 10], //to allow space for title at top, legend at right, and notes at bottom
         borderWidth: 0,
         events: {
-          load: function(event) {
+          load: function() {
             this.renderer
               .image(logoURL, 0, this.chartHeight - 80, 289, 85) //puts logo in lower left
-              .add() // (src,x,y,width,height)
-              
-            getFlowData('Inflows', '2016')
-            
+              .add() // (src,x,y,width,height)            
           }
         }
       },
@@ -211,9 +194,9 @@ function createMap() {
             events: {
               click: function(event) {
                 console.log("clicked on map: " + event.point.name)
-                selected_metro = event.point.fips
-                selected_metro_name = event.point.name
-                focusMetro(event.point.fips, event.point.name)
+                //selected_metro = event.point.fips
+                //selected_metro_name = event.point.name
+                //focusMetro(event.point.fips, event.point.name)
 
               },
             } //end events
@@ -296,39 +279,6 @@ function createMap() {
 
 
 
-/*~~~~ change data to focus on metro ~~~~~~~~~~~~~~~~~~~~~~~~*/
-function focusMetro(GEOID, name) {
-
-  console.log(GEOID + ' ' + name)
-  
-  var new_data = []
-
-  //re-select selected county
-  map.series[0].data.forEach(function(pt) {
-    if (pt.options.fips == GEOID) {
-      map.series[0].data[pt.index].select()
-    }
-  })
-
-  //add button to clear the selection
-  if (!$('#clear_button').length) {
-    map.renderer.button('Clear selection',450,450)
-      .attr({
-      padding: 7,
-      id: 'clear_button'
-    })
-      .add()
-
-    $('#clear_button').click(function () { 
-      netflowMap()
-      selected_metro = ''
-      selected_metro_name = ''
-      $('#clear_button').remove()
-    })
-  }
-  
-}//end focusMetro()
-
 
 $('#select_year').change(function () {
   selected_year = $('#select_year').val()
@@ -347,24 +297,14 @@ $('#select_year').change(function () {
 })
 
 $('#county_type').change(function () {
-  var selected_county_type = $('#county_type').val()
-  map.update[0].points[selected_county_type].select() 
+  
+  selected_county_type = $('#county_type :checked').val()
+  selected_county_type = parseInt(selected_county_type) //to convert from string to int
+  console.log(selected_county_type)
+  
+  //Loop first to create new data table
+   var new_data = ref_data.map(el => [el[0], el[selected_county_type]])
+
+  map.series[0].setData(new_data)
+  
 })
-
-
-
-function resetMap() {
-  selected_metro = ''
-  map.series[0].setData(map_data)
-  map.update({title: {text: 'Net Flows, 2016'}})
-  map.update({
-    legend: {
-      title: {
-        text: 'Net flow of migrants'
-      }
-    },
-    colorAxis: { 
-      dataClasses: data_classes_netflow
-    }
-  })
-}
