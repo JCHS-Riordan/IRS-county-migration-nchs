@@ -88,8 +88,9 @@ function createMap() {
 
     ref_data = obj.values
     
-    map_data = ref_data.map(el => [el[0], el[1]])
-
+    map_data = ref_data
+      .map(el => [el[0], el[1]])
+      .filter(x => typeof x[1] !== 'string')
     
     /*~~~~~~~~ Standard JCHS Highcharts options ~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     Highcharts.setOptions({
@@ -303,8 +304,10 @@ $('#county_type').change(function () {
   console.log(selected_county_type)
   
   //Loop first to create new data table
-   var new_data = ref_data.map(el => [el[0], el[selected_county_type]])
-
+   var new_data = ref_data
+    .map(el => [el[0], el[selected_county_type]])
+    .filter(x => typeof x[1] !== 'string')
+      
   map.series[0].setData(new_data)
   
 })
