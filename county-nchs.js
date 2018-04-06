@@ -23,13 +23,18 @@ data_classes_netflow = [
   },
   {
     from: -100,
-    to: 0,
-    color: "#FF8372" /*Option: gray these out: #F9F6F5 */
+    to: -1,
+    color: "#FF8372"
   },
   {
     from: 0,
+    to: 0,
+    color: "#F9F6F5"
+  },
+  {
+    from: 1,
     to: 100,
-    color: "#F9F6F5" /*NOTE: the missing values (e.g. for non-urban counties) are considered zero, so if you change this coloration, it colors the whole map*/
+    color: "#B9EEEC" 
   },
   {
     from: 100,
@@ -161,7 +166,11 @@ function createMap() {
         x: 10,
         backgroundColor: "rgba(255, 255, 255, 0.9)",
         labelFormatter: function() {
-          if ((this.from != null) & (this.to != null)) { //legend entries w/ upper & lower bound
+          if ((this.from == 0) & (this.to == 0)) {
+            return 'Other county types' //All counties not in selected county type
+          }
+          else if ((this.from != null) & (this.to != null)) { 
+            //legend entries w/ upper & lower bound
             return this.from + " to " + this.to
           } else if (this.to != null) { //lowest legend entry
             return "Lower than " + this.to
