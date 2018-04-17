@@ -81,7 +81,7 @@ function createMap () {
     ref_data = obj.values
 
     map_data = ref_data
-      .map(el => [el[0], el[1]])
+      .map(el => [el[0], el[13]])
       .filter(x => typeof x[1] !== 'string')
 
     /*~~~~~~~~ Standard JCHS Highcharts options ~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
