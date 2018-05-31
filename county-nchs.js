@@ -10,6 +10,8 @@ var counties = Highcharts.geojson(Highcharts.maps["countries/us/us-all-all-highr
 var states = Highcharts.geojson(Highcharts.maps["countries/us/us-all-all-highres"], 'mapline')
 var logoURL = "http://www.jchs.harvard.edu/sites/jchs.harvard.edu/files/harvard_jchs_logo_2017.png"
 
+
+
 var data_classes_netflow = [
   {
     to: -1000,
@@ -54,6 +56,27 @@ var API_params = "valueRenderOption=UNFORMATTED_VALUE"
 var SheetID = "1joBNc8UeeOqFKjmaCgNllemRZKN_UC8Nms-blkebVzI"
 var range = "Sheet1!A:N"
 
+//Changing two outdated county names (changes effective 2015)
+var countiesToChange = [
+     {
+  oldKey: 'us-sd-113',
+  newFips: '46102',
+  newName: 'Oglala Lakota'
+  },
+     {
+  oldKey: 'us-ak-270',
+  newFips: '02158',
+  newName: 'Kusilvak'
+  }
+]
+
+countiesToChange.forEach(function(newInfo) {
+  var county = Highcharts.find(Highcharts.maps['countries/us/us-all-all-highres'].features, function (area) {
+    return area.properties['hc-key'] === newInfo.oldKey
+  })
+  county.properties.fips = newInfo.newFips
+  county.name = newInfo.newName
+})
 
 /*~~~~~~ Document ready function ~~~~~~~~~~~~~~~~~*/
 $(document).ready(function () {
